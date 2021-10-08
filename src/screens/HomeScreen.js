@@ -38,7 +38,7 @@ const HomeScreen = () => {
       <View style={styles.items}>
         <Image
           source={{uri: item.image}}
-          style={{width: 100, height: 100, alignSelf: 'flex-end'}}
+          style={{width: 200, height: 200, alignSelf: 'flex-end'}}
         />
         <Text style={{color: '#000'}}>{item.title}</Text>
       </View>

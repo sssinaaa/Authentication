@@ -22,17 +22,16 @@ const SignInScreen = ({navigation}) => {
 
   const onPress = async () => {
     try {
-      for (let i = 0; i < user.length; i++) {
-        if (username === user[i].username && password === user[i].password) {
+      const userIndex = user.findIndex(e => e.username == username);
+      const passIndex = user.findIndex(e => e.password == password);
+      if (userIndex > -1) {
+        if (passIndex > -1 && passIndex == userIndex) {
           const jsonValue = '1';
           await AsyncStorage.setItem('log', jsonValue);
           await setToken(jsonValue);
-        } else if (
-          username !== user[i].username ||
-          password !== user[i].password
-        ) {
-          setError('your username or password is not correct');
         }
+      } else {
+        setError('your username or password is not correct');
       }
     } catch (err) {
       console.log(err);
