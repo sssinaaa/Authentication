@@ -1,0 +1,119 @@
+import React, {useContext, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
+
+import {AuthenticationContext} from '../context/AuthenticationContext';
+import {PaginationContext} from '../context/PaginationContext';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const SignInScreen = ({navigation}) => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const [token, setToken] = useContext(PaginationContext);
+  const [user] = useContext(AuthenticationContext);
+
+  const onPress = async () => {
+    try {
+      for (let i = 0; i < user.length; i++) {
+        if (username === user[i].username && password === user[i].password) {
+          const jsonValue = '1';
+          await AsyncStorage.setItem('log', jsonValue);
+          await setToken(jsonValue);
+        } else if (
+          username !== user[i].username ||
+          password !== user[i].password
+        ) {
+          setError('your username or password is not correct');
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const navToSignUp = () => {
+    navigation.navigate('Sign Up');
+  };
+
+  return (
+    <View style={{flex: 1, backgroundColor: '#fff'}}>
+      <View style={styles.topView}>
+        <Text style={{color: '#fff', fontSize: 28}}>Let's get started.</Text>
+        <Text style={{color: 'gray', fontSize: 28}}>
+          Login to your account.
+        </Text>
+      </View>
+      <View style={styles.bottomView}>
+        <View>
+          <Text style={styles.error}>{error}</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your username"
+            onChangeText={value => setUsername(value)}></TextInput>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your password"
+            secureTextEntry={true}
+            onChangeText={value => setPassword(value)}></TextInput>
+          <TouchableOpacity style={styles.buttonPrimary} onPress={onPress}>
+            <Text style={{color: '#fff'}}>Sign In</Text>
+          </TouchableOpacity>
+
+          <Text style={{padding: 5}}>Don't have an account ?</Text>
+          <TouchableOpacity style={styles.buttonPrimary} onPress={navToSignUp}>
+            <Text style={{color: '#fff'}}>Sign Up</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  topView: {
+    backgroundColor: '#201e28',
+    height: 250,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bottomView: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderTopStartRadius: 60,
+    borderTopEndRadius: 60,
+    bottom: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonPrimary: {
+    width: 300,
+    backgroundColor: '#201e28',
+    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 60,
+    marginVertical: 10,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: 'gray',
+    marginVertical: 10,
+    borderRadius: 60,
+    width: 300,
+    padding: 10,
+  },
+  error: {
+    color: 'red',
+    marginTop: 10,
+  },
+});
+
+export default SignInScreen;
