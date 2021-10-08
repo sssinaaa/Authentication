@@ -35,13 +35,7 @@ const HomeScreen = () => {
 
   const renderItem = ({item}) => {
     return (
-      <View
-        style={{
-          flex: 1,
-          marginVertical: 10,
-          marginHorizontal: 10,
-          padding: 10,
-        }}>
+      <View style={styles.items}>
         <Image
           source={{uri: item.image}}
           style={{width: 100, height: 100, alignSelf: 'flex-end'}}
@@ -60,12 +54,12 @@ const HomeScreen = () => {
         placeholder="Search"
         onChangeText={value => getDataFromApi(value)}></TextInput>
       <View style={styles.container}>
-        <View style={styles.items}>
+        <View style={styles.itemsContainer}>
           <FlatList data={result} renderItem={renderItem} />
         </View>
       </View>
-      <TouchableOpacity onPress={signOut}>
-        <Text>Sign out</Text>
+      <TouchableOpacity onPress={signOut} style={styles.buttonPrimary}>
+        <Text style={{color: '#fff'}}>Sign out</Text>
       </TouchableOpacity>
     </View>
   );
@@ -85,12 +79,28 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 10,
   },
-  items: {
+  itemsContainer: {
     backgroundColor: '#fff',
     flex: 1,
     marginVertical: 30,
     marginHorizontal: 30,
     borderRadius: 20,
+  },
+  items: {
+    flex: 1,
+    marginVertical: 10,
+    marginHorizontal: 10,
+    padding: 10,
+  },
+  buttonPrimary: {
+    width: 300,
+    backgroundColor: '#201e28',
+    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 60,
+    marginVertical: 10,
+    alignSelf: 'center',
   },
 });
 

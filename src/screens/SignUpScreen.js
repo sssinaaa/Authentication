@@ -44,7 +44,6 @@ const SignUpScreen = ({navigation}) => {
       setObjectValue(signUpUser);
       setUser(signUpUser);
       console.log('sign up user ', signUpUser);
-      // navigation.navigate('Sign In');
     }
   };
 
