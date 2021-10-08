@@ -14,8 +14,9 @@ const SignUpScreen = ({navigation}) => {
   const [user, setUser] = useContext(AuthenticationContext);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [passError, setPassError] = useState('');
   const [userError, setUserError] = useState('');
+  const [passError, setPassError] = useState('');
+  const [message, setMessage] = useState('');
 
   const setObjectValue = async value => {
     try {
@@ -43,6 +44,7 @@ const SignUpScreen = ({navigation}) => {
       ];
       setObjectValue(signUpUser);
       setUser(signUpUser);
+      setMessage('Account successfully created. now you can sign in');
       console.log('sign up user ', signUpUser);
     }
   };
@@ -67,18 +69,23 @@ const SignUpScreen = ({navigation}) => {
       </View>
       <View style={styles.bottomView}>
         <View>
+          <Text style={{padding: 10, color: 'green'}}>{message}</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter your username"
             onChangeText={value => setUsername(value)}
             onBlur={usernameValidator}></TextInput>
-          <Text style={{color: 'red'}}>{userError}</Text>
+          {userError.length !== 0 ? (
+            <Text style={{color: 'red'}}>{userError}</Text>
+          ) : null}
           <TextInput
             style={styles.input}
             placeholder="Enter your password"
             onChangeText={value => setPassword(value)}
             onBlur={passwordValidator}></TextInput>
-          <Text style={{color: 'red'}}>{passError}</Text>
+          {passError.length !== 0 ? (
+            <Text style={{color: 'red'}}>{passError}</Text>
+          ) : null}
           <TouchableOpacity onPress={onPress} style={styles.primaryButton}>
             <Text style={{color: '#fff'}}>Sign Up</Text>
           </TouchableOpacity>
