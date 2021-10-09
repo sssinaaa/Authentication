@@ -5,58 +5,39 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
-import {AuthenticationContext} from '../context/AuthenticationContext';
+import {Formik} from 'formik';
+import * as yup from 'yup';
 
+import {AuthenticationContext} from '../context/AuthenticationContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const validationSchema = yup.object({
+  username: yup
+    .string()
+    .trim()
+    .min(3, 'Invalid username')
+    .required('Username is required'),
+  password: yup
+    .string()
+    .trim()
+    .min(8, 'Password is too short')
+    .required('Password is required'),
+});
 
 const SignUpScreen = ({navigation}) => {
   const [user, setUser] = useContext(AuthenticationContext);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [userError, setUserError] = useState('');
-  const [passError, setPassError] = useState('');
-  const [message, setMessage] = useState('');
 
-  const setObjectValue = async value => {
+  const storeUserData = async value => {
     try {
       const stringValue = JSON.stringify(value);
       await AsyncStorage.setItem('key', stringValue);
-    } catch (e) {
-      console.log('set error', e);
-      // save error
+    } catch (error) {
+      console.log(error);
     }
-    console.log('value: ', value);
-  };
-
-  const onPress = () => {
-    let regex = /^[a-zA-z]+$/;
-    let isValid = regex.test(username);
-    if (!isValid) setUserError('Username must be characters');
-    else {
-      setUserError('');
-      let signUpUser = [
-        ...user,
-        {
-          username: username,
-          password: password,
-        },
-      ];
-      setObjectValue(signUpUser);
-      setUser(signUpUser);
-      setMessage('Account successfully created. now you can sign in');
-      console.log('sign up user ', signUpUser);
-    }
-  };
-
-  const usernameValidator = () => {
-    if (username == '') setUserError('Username can not be empty');
-    else setUserError('');
-  };
-
-  const passwordValidator = () => {
-    if (password == '') setPassError('password can not be empty');
-    else setPassError('');
+    console.log(value);
   };
 
   return (
@@ -67,36 +48,62 @@ const SignUpScreen = ({navigation}) => {
           Login to your account.
         </Text>
       </View>
-      <View style={styles.bottomView}>
-        <View>
-          <Text style={{padding: 10, color: 'green'}}>{message}</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your username"
-            onChangeText={value => setUsername(value)}
-            onBlur={usernameValidator}></TextInput>
-          {userError.length !== 0 ? (
-            <Text style={{color: 'red'}}>{userError}</Text>
-          ) : null}
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your password"
-            onChangeText={value => setPassword(value)}
-            onBlur={passwordValidator}></TextInput>
-          {passError.length !== 0 ? (
-            <Text style={{color: 'red'}}>{passError}</Text>
-          ) : null}
-          <TouchableOpacity onPress={onPress} style={styles.primaryButton}>
-            <Text style={{color: '#fff'}}>Sign Up</Text>
-          </TouchableOpacity>
-          <Text style={{padding: 10}}>
-            Already have an account?{' '}
-            <TouchableOpacity onPress={() => navigation.navigate('Sign In')}>
-              <Text>Sign In</Text>
-            </TouchableOpacity>
-          </Text>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.bottomView}>
+          <View>
+            <Formik
+              initialValues={{
+                username: '',
+                password: '',
+              }}
+              validationSchema={validationSchema}
+              onSubmit={(values, actions) => {
+                let signUpUser = [...user, values];
+                storeUserData(signUpUser);
+                setUser(signUpUser);
+                actions.resetForm();
+              }}>
+              {props => (
+                <View>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your username"
+                    onChangeText={props.handleChange('username')}
+                    onBlur={props.handleBlur('username')}
+                    value={props.values.username}></TextInput>
+                  {props.touched.username && props.errors.username ? (
+                    <Text>
+                      {props.touched.username && props.errors.username}
+                    </Text>
+                  ) : null}
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your password"
+                    onChangeText={props.handleChange('password')}
+                    onBlur={props.handleBlur('password')}
+                    value={props.values.password}></TextInput>
+                  {props.touched.password && props.errors.password ? (
+                    <Text>
+                      {props.touched.password && props.errors.password}
+                    </Text>
+                  ) : null}
+                  <TouchableOpacity
+                    style={styles.primaryButton}
+                    onPress={props.handleSubmit}>
+                    <Text style={{color: '#fff'}}>Sign Up</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </Formik>
+            <Text style={{padding: 10}}>
+              Already have an account?{' '}
+              <TouchableOpacity onPress={() => navigation.navigate('Sign In')}>
+                <Text>Sign In</Text>
+              </TouchableOpacity>
+            </Text>
+          </View>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </View>
   );
 };
