@@ -5,38 +5,27 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 
 import {AuthenticationContext} from '../context/AuthenticationContext';
 import {PaginationContext} from '../context/PaginationContext';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Formik} from 'formik';
+import * as Yup from 'yup';
+
+const validationSchema = Yup.object({
+  username: Yup.string().required('Username is required'),
+  password: Yup.string().required('Password is Required'),
+});
 
 const SignInScreen = ({navigation}) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const [token, setToken] = useContext(PaginationContext);
   const [user] = useContext(AuthenticationContext);
-
-  const onPress = async () => {
-    try {
-      const userIndex = user.findIndex(e => e.username == username);
-      const passIndex = user.findIndex(e => e.password == password);
-      if (userIndex > -1) {
-        if (passIndex > -1 && passIndex == userIndex) {
-          const jsonValue = '1';
-          await AsyncStorage.setItem('log', jsonValue);
-          await setToken(jsonValue);
-        }
-      } else {
-        setError('your username or password is not correct');
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   const navToSignUp = () => {
     navigation.navigate('Sign Up');
@@ -50,28 +39,82 @@ const SignInScreen = ({navigation}) => {
           Login to your account.
         </Text>
       </View>
-      <View style={styles.bottomView}>
-        <View>
-          <Text style={styles.error}>{error}</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your username"
-            onChangeText={value => setUsername(value)}></TextInput>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your password"
-            secureTextEntry={true}
-            onChangeText={value => setPassword(value)}></TextInput>
-          <TouchableOpacity style={styles.buttonPrimary} onPress={onPress}>
-            <Text style={{color: '#fff'}}>Sign In</Text>
-          </TouchableOpacity>
-
-          <Text style={{padding: 5}}>Don't have an account ?</Text>
-          <TouchableOpacity style={styles.buttonPrimary} onPress={navToSignUp}>
-            <Text style={{color: '#fff'}}>Sign Up</Text>
-          </TouchableOpacity>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.bottomView}>
+          <View>
+            <Formik
+              initialValues={{
+                username: '',
+                password: '',
+              }}
+              validationSchema={validationSchema}
+              onSubmit={async values => {
+                try {
+                  const userIndex = user.findIndex(
+                    e => e.username == values.username,
+                  );
+                  const passIndex = user.findIndex(
+                    e => e.password == values.password,
+                  );
+                  if (userIndex > -1) {
+                    if (passIndex > -1 && passIndex == userIndex) {
+                      const jsonValue = '1';
+                      await AsyncStorage.setItem('log', jsonValue);
+                      await setToken(jsonValue);
+                    }
+                  } else {
+                    setError('your username or password is not correct');
+                  }
+                } catch (err) {
+                  console.log(err);
+                }
+              }}>
+              {({
+                handleChange,
+                handleBlur,
+                handleSubmit,
+                values,
+                touched,
+                errors,
+              }) => (
+                <View>
+                  <Text style={styles.error}>{error}</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your username"
+                    onChangeText={handleChange('username')}
+                    onBlur={handleBlur('username')}
+                    value={values.username}></TextInput>
+                  {touched.username && errors.username ? (
+                    <Text>{touched.username && errors.username}</Text>
+                  ) : null}
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your password"
+                    secureTextEntry={true}
+                    onChangeText={handleChange('password')}
+                    onBlur={handleBlur('password')}
+                    value={values.password}></TextInput>
+                  {touched.password && errors.password ? (
+                    <Text>{touched.password && errors.password}</Text>
+                  ) : null}
+                  <TouchableOpacity
+                    style={styles.buttonPrimary}
+                    onPress={handleSubmit}>
+                    <Text style={{color: '#fff'}}>Sign In</Text>
+                  </TouchableOpacity>
+                  <Text style={{padding: 5}}>Don't have an account ?</Text>
+                  <TouchableOpacity
+                    style={styles.buttonPrimary}
+                    onPress={navToSignUp}>
+                    <Text style={{color: '#fff'}}>Sign Up</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </Formik>
+          </View>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </View>
   );
 };

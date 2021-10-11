@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext} from 'react';
 import {
   View,
   Text,
@@ -63,33 +63,36 @@ const SignUpScreen = ({navigation}) => {
                 setUser(signUpUser);
                 actions.resetForm();
               }}>
-              {props => (
+              {({
+                handleSubmit,
+                handleChange,
+                handleBlur,
+                values,
+                touched,
+                errors,
+              }) => (
                 <View>
                   <TextInput
                     style={styles.input}
                     placeholder="Enter your username"
-                    onChangeText={props.handleChange('username')}
-                    onBlur={props.handleBlur('username')}
-                    value={props.values.username}></TextInput>
-                  {props.touched.username && props.errors.username ? (
-                    <Text>
-                      {props.touched.username && props.errors.username}
-                    </Text>
+                    onChangeText={handleChange('username')}
+                    onBlur={handleBlur('username')}
+                    value={values.username}></TextInput>
+                  {touched.username && errors.username ? (
+                    <Text>{touched.username && errors.username}</Text>
                   ) : null}
                   <TextInput
                     style={styles.input}
                     placeholder="Enter your password"
-                    onChangeText={props.handleChange('password')}
-                    onBlur={props.handleBlur('password')}
-                    value={props.values.password}></TextInput>
-                  {props.touched.password && props.errors.password ? (
-                    <Text>
-                      {props.touched.password && props.errors.password}
-                    </Text>
+                    onChangeText={handleChange('password')}
+                    onBlur={handleBlur('password')}
+                    value={values.password}></TextInput>
+                  {touched.password && errors.password ? (
+                    <Text>{touched.password && errors.password}</Text>
                   ) : null}
                   <TouchableOpacity
                     style={styles.primaryButton}
-                    onPress={props.handleSubmit}>
+                    onPress={handleSubmit}>
                     <Text style={{color: '#fff'}}>Sign Up</Text>
                   </TouchableOpacity>
                 </View>
