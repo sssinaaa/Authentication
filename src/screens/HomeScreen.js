@@ -47,8 +47,6 @@ const HomeScreen = () => {
     );
   };
 
-  console.log(result);
-
   return (
     <View style={{flex: 1}}>
       <TextInput
@@ -58,7 +56,7 @@ const HomeScreen = () => {
       <View style={styles.container}>
         {result.length !== 0 ? (
           <View style={styles.itemsContainer}>
-            <FlatList data={result} renderItem={renderItem} horizontal={true} />
+            <FlatList data={result} renderItem={renderItem} />
           </View>
         ) : (
           <View style={styles.itemsContainer}>

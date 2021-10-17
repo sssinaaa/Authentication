@@ -41,7 +41,7 @@ const SignUpScreen = ({navigation}) => {
   };
 
   return (
-    <View style={{flex: 1, backgroundColor: '#fff'}}>
+    <View style={{flex: 1, backgroundColor: '#201e28'}}>
       <View style={styles.topView}>
         <Text style={{color: '#fff', fontSize: 28}}>Let's get started.</Text>
         <Text style={{color: 'gray', fontSize: 28}}>
@@ -123,6 +123,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopStartRadius: 60,
     borderTopEndRadius: 60,
+    borderBottomLeftRadius: 60,
+    borderBottomRightRadius: 60,
     bottom: 60,
     justifyContent: 'center',
     alignItems: 'center',
