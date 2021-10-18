@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useReducer} from 'react';
 import {
   View,
   Text,
@@ -12,13 +12,38 @@ import {PaginationContext} from '../context/PaginationContext';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const SignInScreen = ({navigation}) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'username':
+      return {
+        ...state,
+        username: action.payload,
+      };
+    case 'password':
+      return {
+        ...state,
+        password: action.payload,
+      };
+    case 'error':
+      return {
+        ...state,
+        error: action.payload,
+      };
+  }
+};
 
-  const [token, setToken] = useContext(PaginationContext);
+const initialState = {
+  username: '',
+  password: '',
+  error: '',
+};
+
+const SignInScreen = ({navigation}) => {
   const [user] = useContext(AuthenticationContext);
+  const [token, setToken] = useContext(PaginationContext);
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const {username, password, error} = state;
 
   const onPress = async () => {
     try {
@@ -31,15 +56,14 @@ const SignInScreen = ({navigation}) => {
           await setToken(jsonValue);
         }
       } else {
-        setError('your username or password is not correct');
+        dispatch({
+          type: 'error',
+          payload: 'your username or password is not correct',
+        });
       }
     } catch (err) {
       console.log(err);
     }
-  };
-
-  const navToSignUp = () => {
-    navigation.navigate('Sign Up');
   };
 
   return (
@@ -56,18 +80,24 @@ const SignInScreen = ({navigation}) => {
           <TextInput
             style={styles.input}
             placeholder="Enter your username"
-            onChangeText={value => setUsername(value)}></TextInput>
+            onChangeText={value =>
+              dispatch({type: 'username', payload: value})
+            }></TextInput>
           <TextInput
             style={styles.input}
             placeholder="Enter your password"
             secureTextEntry={true}
-            onChangeText={value => setPassword(value)}></TextInput>
+            onChangeText={value =>
+              dispatch({type: 'password', payload: value})
+            }></TextInput>
           <TouchableOpacity style={styles.buttonPrimary} onPress={onPress}>
             <Text style={{color: '#fff'}}>Sign In</Text>
           </TouchableOpacity>
 
           <Text style={{padding: 5}}>Don't have an account ?</Text>
-          <TouchableOpacity style={styles.buttonPrimary} onPress={navToSignUp}>
+          <TouchableOpacity
+            style={styles.buttonPrimary}
+            onPress={() => navigation.navigate('Sign Up')}>
             <Text style={{color: '#fff'}}>Sign Up</Text>
           </TouchableOpacity>
         </View>
