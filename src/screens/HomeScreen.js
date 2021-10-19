@@ -47,8 +47,6 @@ const HomeScreen = () => {
     );
   };
 
-  console.log(result);
-
   return (
     <View style={{flex: 1}}>
       <TextInput

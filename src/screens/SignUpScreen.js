@@ -1,102 +1,116 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
-import {AuthenticationContext} from '../context/AuthenticationContext';
+import {Formik} from 'formik';
+import * as yup from 'yup';
 
+import {AuthenticationContext} from '../context/AuthenticationContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const SignUpScreen = ({navigation}) => {
-  const [user, setUser] = useContext(AuthenticationContext);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [userError, setUserError] = useState('');
-  const [passError, setPassError] = useState('');
-  const [message, setMessage] = useState('');
+const validationSchema = yup.object({
+  username: yup
+    .string()
+    .trim()
+    .min(3, 'Invalid username')
+    .required('Username is required'),
+  password: yup
+    .string()
+    .trim()
+    .min(8, 'Password is too short')
+    .required('Password is required'),
+});
 
-  const setObjectValue = async value => {
+const SignUpScreen = ({navigation}) => {
+  const [state, dispatch] = useContext(AuthenticationContext);
+
+  const {user} = state;
+
+  console.log('user in signup', user);
+
+  const storeUserData = async value => {
     try {
       const stringValue = JSON.stringify(value);
       await AsyncStorage.setItem('key', stringValue);
-    } catch (e) {
-      console.log('set error', e);
-      // save error
+    } catch (error) {
+      console.log(error);
     }
-    console.log('value: ', value);
-  };
-
-  const onPress = () => {
-    let regex = /^[a-zA-z]+$/;
-    let isValid = regex.test(username);
-    if (!isValid) setUserError('Username must be characters');
-    else {
-      setUserError('');
-      let signUpUser = [
-        ...user,
-        {
-          username: username,
-          password: password,
-        },
-      ];
-      setObjectValue(signUpUser);
-      setUser(signUpUser);
-      setMessage('Account successfully created. now you can sign in');
-      console.log('sign up user ', signUpUser);
-    }
-  };
-
-  const usernameValidator = () => {
-    if (username == '') setUserError('Username can not be empty');
-    else setUserError('');
-  };
-
-  const passwordValidator = () => {
-    if (password == '') setPassError('password can not be empty');
-    else setPassError('');
+    console.log(value);
   };
 
   return (
-    <View style={{flex: 1, backgroundColor: '#fff'}}>
+    <View style={{flex: 1, backgroundColor: '#201e28'}}>
       <View style={styles.topView}>
         <Text style={{color: '#fff', fontSize: 28}}>Let's get started.</Text>
         <Text style={{color: 'gray', fontSize: 28}}>
           Login to your account.
         </Text>
       </View>
-      <View style={styles.bottomView}>
-        <View>
-          <Text style={{padding: 10, color: 'green'}}>{message}</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your username"
-            onChangeText={value => setUsername(value)}
-            onBlur={usernameValidator}></TextInput>
-          {userError.length !== 0 ? (
-            <Text style={{color: 'red'}}>{userError}</Text>
-          ) : null}
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your password"
-            onChangeText={value => setPassword(value)}
-            onBlur={passwordValidator}></TextInput>
-          {passError.length !== 0 ? (
-            <Text style={{color: 'red'}}>{passError}</Text>
-          ) : null}
-          <TouchableOpacity onPress={onPress} style={styles.primaryButton}>
-            <Text style={{color: '#fff'}}>Sign Up</Text>
-          </TouchableOpacity>
-          <Text style={{padding: 10}}>
-            Already have an account?{' '}
-            <TouchableOpacity onPress={() => navigation.navigate('Sign In')}>
-              <Text>Sign In</Text>
-            </TouchableOpacity>
-          </Text>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.bottomView}>
+          <View>
+            <Formik
+              initialValues={{
+                username: '',
+                password: '',
+              }}
+              validationSchema={validationSchema}
+              onSubmit={(values, actions) => {
+                let signUpUser = [...user, values];
+                storeUserData(signUpUser);
+                dispatch({type: 'setUser', payload: signUpUser});
+                actions.resetForm();
+              }}>
+              {({
+                handleSubmit,
+                handleChange,
+                handleBlur,
+                values,
+                touched,
+                errors,
+              }) => (
+                <View>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your username"
+                    onChangeText={handleChange('username')}
+                    onBlur={handleBlur('username')}
+                    value={values.username}></TextInput>
+                  {touched.username && errors.username ? (
+                    <Text>{touched.username && errors.username}</Text>
+                  ) : null}
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your password"
+                    onChangeText={handleChange('password')}
+                    onBlur={handleBlur('password')}
+                    value={values.password}></TextInput>
+                  {touched.password && errors.password ? (
+                    <Text>{touched.password && errors.password}</Text>
+                  ) : null}
+                  <TouchableOpacity
+                    style={styles.primaryButton}
+                    onPress={handleSubmit}>
+                    <Text style={{color: '#fff'}}>Sign Up</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </Formik>
+            <Text style={{padding: 10}}>
+              Already have an account?{' '}
+              <TouchableOpacity onPress={() => navigation.navigate('Sign In')}>
+                <Text>Sign In</Text>
+              </TouchableOpacity>
+            </Text>
+          </View>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </View>
   );
 };
@@ -113,6 +127,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopStartRadius: 60,
     borderTopEndRadius: 60,
+    borderBottomLeftRadius: 60,
+    borderBottomRightRadius: 60,
     bottom: 60,
     justifyContent: 'center',
     alignItems: 'center',

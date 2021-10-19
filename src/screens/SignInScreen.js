@@ -12,38 +12,10 @@ import {PaginationContext} from '../context/PaginationContext';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const reducer = (state, action) => {
-  switch (action.type) {
-    case 'username':
-      return {
-        ...state,
-        username: action.payload,
-      };
-    case 'password':
-      return {
-        ...state,
-        password: action.payload,
-      };
-    case 'error':
-      return {
-        ...state,
-        error: action.payload,
-      };
-  }
-};
-
-const initialState = {
-  username: '',
-  password: '',
-  error: '',
-};
-
 const SignInScreen = ({navigation}) => {
-  const [user] = useContext(AuthenticationContext);
+  const [state, dispatch] = useContext(AuthenticationContext);
   const [token, setToken] = useContext(PaginationContext);
-
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const {username, password, error} = state;
+  const {username, password, error, user} = state;
 
   const onPress = async () => {
     try {
@@ -65,7 +37,6 @@ const SignInScreen = ({navigation}) => {
       console.log(err);
     }
   };
-
   return (
     <View style={{flex: 1, backgroundColor: '#fff'}}>
       <View style={styles.topView}>
@@ -81,14 +52,14 @@ const SignInScreen = ({navigation}) => {
             style={styles.input}
             placeholder="Enter your username"
             onChangeText={value =>
-              dispatch({type: 'username', payload: value})
+              dispatch({type: 'signInUsername', payload: value})
             }></TextInput>
           <TextInput
             style={styles.input}
             placeholder="Enter your password"
             secureTextEntry={true}
             onChangeText={value =>
-              dispatch({type: 'password', payload: value})
+              dispatch({type: 'signInPassword', payload: value})
             }></TextInput>
           <TouchableOpacity style={styles.buttonPrimary} onPress={onPress}>
             <Text style={{color: '#fff'}}>Sign In</Text>
